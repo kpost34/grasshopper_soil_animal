@@ -27,8 +27,8 @@ The aim of this project was to assess the impact of grasshopper feeding on assem
 - [x] Plant data analysis
 - [x] Microarthropod data analysis
 - [x] Nematode data analysis
-[ ] Visualize final results 
-[ ] Write up results
+- [ ] Visualize final results 
+- [ ] Write up results
 
 
 #### **Project Creator: Keith Post**
