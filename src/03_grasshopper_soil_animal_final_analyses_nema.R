@@ -5,13 +5,6 @@ library(vegan)
 library(dplyr)
 
 
-
-#Analyses
-#nema dens and props: rm perMANOVA using B-C dissimilarity index
-#changes in dens & props WERE analyzed with t-tests (on change data)
-#--> consider ANCOVAs
-
-
 #IV. Statistical analyses/modeling
 #**********************************
 #1. Import tidy datasets
@@ -102,7 +95,6 @@ nema_prop_mod
 
 #Univariate tests
 #Total nematode
-#LOOK INTO TESTING ASSUMPTIONS
 #wrangle data
 nema_dens_total<-nema_dens[,c(1:3,10)] #extract cols of interest
 total_nema_final<-nema_dens_total %>%  #extract total nema densities at final harvest
@@ -128,7 +120,7 @@ anova(total_nema_mod1,total_nema_mod2) #compare the two models, which shows p>.0
 #STOPPING POINT: PRODUCE PLOT OF THIS--PERHAPS USE ONE OF THOSE CORRELATION PACKAGES
 nema_dens_total %>% ggplot(aes(total_nema_initial,total_nema_final))
 
-
+#NEXT STEPS: univariate analyses of feeding groups, NMDS plots, etc.
 
 
 
