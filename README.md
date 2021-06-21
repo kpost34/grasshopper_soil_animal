@@ -2,7 +2,7 @@
 Data tidying using tidyverse packages.
 
 ## Introduction
-The overall goal of this project was to assess the impact of grasshopper feeding on assemblages of soil nematodes and microarthropods in the shortgrass steppe of northern Colorado. In this specific data project, the aim was to use tidyverse packages (e.g., forcats, dplyr) to clean and wrangle the data from raw to tidy in preparation for analysis. 
+The overall goal of this project was to assess the impact of grasshopper feeding on assemblages of soil nematodes and microarthropods in the shortgrass steppe of northern Colorado. In this specific data project, the aim was to use tidyverse packages (e.g., forcats, dplyr) to clean and wrangle the data from raw to tidy in preparation for analysis. A description of this process is provided as .rmd and .md documents.
 
 ## Technologies
 * RStudio 1.2.5033
