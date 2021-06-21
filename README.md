@@ -1,8 +1,8 @@
 # **Effects of Grasshoppers on Soil Animal Communities**
-Re-analysis of master's thesis using tidyverse packages.
+Data tidying using tidyverse packages.
 
 ## Introduction
-The aim of this project was to assess the impact of grasshopper feeding on assemblages of soil nematodes and microarthropods in the shortgrass steppe of northern Colorado. A short-term field experiment was conducted and data on grasshoppers, plants (above- and belowground), and soil moisture, nematodes, and microarthropods were collected. The data were cleaned and wrangled using tidyverse packages, and analysis included parametric and non-parmaetric tests, multivariate methods, and a mixed-effects model. 
+The overall goal of this project was to assess the impact of grasshopper feeding on assemblages of soil nematodes and microarthropods in the shortgrass steppe of northern Colorado. In this specific data project, the aim was to use tidyverse packages (e.g., forcats, dplyr) to clean and wrangle the data from raw to tidy in preparation for analysis. 
 
 ## Technologies
 * RStudio 1.2.5033
@@ -13,22 +13,14 @@ The aim of this project was to assess the impact of grasshopper feeding on assem
   + janitor 2.0.1
   + visdat 0.5.3
   + skimr 2.1
-  + PerformanceAnalytics 2.0.4
-  + GGally 2.1.0
-  + vegan 2.5-6
-  + nlme 3.1-144
 
   
 ## Future updates
 - [x] Read in data
-- [x] Clean, wrangle, and preprocess data
-- [x] EDA
-- [x] Grasshopper data analysis
-- [x] Plant data analysis
-- [x] Microarthropod data analysis
-- [x] Nematode data analysis
-- [ ] Visualize final results 
-- [ ] Write up results
+- [x] Clean data
+- [x] Wrangle data
+- [x] Check data
+- [x] Save tidy data
 
 
 #### **Project Creator: Keith Post**
