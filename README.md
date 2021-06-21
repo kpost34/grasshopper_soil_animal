@@ -1,39 +1,37 @@
-# grasshopper_soil_animal
+# **Effects of Grasshoppers on Soil Animal Communities**
+Re-analysis of master's thesis using tidyverse packages.
 
-Welcome to ProjectTemplate!
+## Introduction
+The aim of this project was to assess the impact of grasshopper feeding on assemblages of soil nematodes and microarthropods in the shortgrass steppe of northern Colorado. A short-term field experiment was conducted and data on grasshoppers, plants (above- and belowground), and soil moisture, nematodes, and microarthropods were collected. The data were cleaned and wrangled using tidyverse packages, and analysis included parametric and non-parmaetric tests, multivariate methods, and a mixed-effects model. 
 
-This file introduces you to ProjectTemplate, but you should eventually replace
-the contents of this file with an introduction to your project. People who
-work with your data in the future will thank you for it, including your future
-self.
+## Technologies
+* RStudio 1.2.5033
+* R 3.6.2 ("Dark and Stormy Night")
+  + tidyverse 1.3.0
+  + readxl 1.3.1
+  + here 1.0.0
+  + janitor 2.0.1
+  + visdat 0.5.3
+  + skimr 2.1
+  + PerformanceAnalytics 2.0.4
+  + GGally 2.1.0
+  + vegan 2.5-6
+  + nlme 3.1-144
 
-ProjectTemplate is an R package that helps you organize your statistical
-analysis projects. Since you're reading this file, we'll assume that you've
-already called `create.project()` to set up this project and all of its
-contents.
+  
+## Future updates
+- [x] Read in data
+- [x] Clean, wrangle, and preprocess data
+- [x] EDA
+- [x] Grasshopper data analysis
+- [x] Plant data analysis
+- [x] Microarthropod data analysis
+- [x] Nematode data analysis
+- [] Visualize final results
+- [] Write up results
 
-To load your new project, you'll first need to `setwd()` into the directory
-where this README file is located. Then you need to run the following two
-lines of R code:
 
-	library('ProjectTemplate')
-	load.project()
-
-After you enter the second line of code, you'll see a series of automated
-messages as ProjectTemplate goes about doing its work. This work involves:
-* Reading in the global configuration file contained in `config`.
-* Loading any R packages you listed in the configuration file.
-* Reading in any datasets stored in `data` or `cache`.
-* Preprocessing your data using the files in the `munge` directory.
-
-Once that's done, you can execute any code you'd like. For every analysis
-you create, we'd recommend putting a separate file in the `src` directory.
-If the files start with the two lines mentioned above:
-
-	library('ProjectTemplate')
-	load.project()
-
-You'll have access to all of your data, already fully preprocessed, and
-all of the libraries you want to use.
-
-For more details about ProjectTemplate, see http://projecttemplate.net
+#### **Project Creator: Keith Post**
++ [Github Profile](https://github.com/kpost34) 
++ [LinkedIN Profile](https://www.linkedin.com/in/keith-post/)
++ [Email](mailto:keithhpost@gmail.com)
