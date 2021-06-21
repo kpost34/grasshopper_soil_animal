@@ -16,7 +16,7 @@ The overall goal of this project was to assess the impact of grasshopper feeding
 
   
 ## Future updates
-- [x] Read in data
+- [x] Read in raw data
 - [x] Clean data
 - [x] Wrangle data
 - [x] Check data
