@@ -1,4 +1,4 @@
-# **Effects of Grasshoppers on Soil Animal Communities**
+# **Ecology Data Tidying Project**
 Data tidying using tidyverse packages.
 
 ## Introduction
