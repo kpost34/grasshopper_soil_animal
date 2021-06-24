@@ -78,7 +78,7 @@ ag_plant_by_plot$trmt<-as.factor(ag_plant_by_plot$trmt)
 names(ag_plant_groups)[1]<-"plot"
 ag_plant_groups$plot<-as.integer(ag_plant_groups$plot)
 
-#join ag plant tibbles and create fescue biomass col
+#join ag plant tibbles, create fescue biomass col, and convert biomass to g/m2
 ag_plant_biomass<-inner_join(ag_plant_by_plot,ag_plant_groups,by="plot") %>%
   mutate(fescue_biomass=tot_ag_biomass_g-(other_grasses_g+forbs_g+shrubs_g)) %>% #create fescue col
   select(plot,trmt,fescue_biomass,other_grasses_g,forbs_g,shrubs_g,tot_ag_biomass_g) %>% #reorder using select

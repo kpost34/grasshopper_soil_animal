@@ -38,7 +38,6 @@ final_mite<-read_xlsx(here("data","raw_data","field_expt_soil_orgs.xlsx"),
 
 #II. Data cleaning, wrangling, and preprocessing
 #***********************************************
-
 #1. Data cleaning and tidying
 #A. Soil data
 #preliminary data checking
@@ -138,7 +137,7 @@ mite<-clean_names(mite)
 names(mite) #plot is for IDing; harvest indicates start/end of expt; ff and pr are for fungal-feeding and predaceous mites;
 #total is for total microarthropods (need to compute total mites as well)
 
-#compute nema variables of interest based on nema counts and dry soil data, append trmt variable
+#compute mite variables of interest based on mite counts and dry soil data, append trmt variable
 mite_dens<-mite %>%
   rename(ff_mite=ff) %>%
   rename(pr_mite=pr) %>%

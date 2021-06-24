@@ -1,0 +1,535 @@
+---
+title: "Ecology Data Tidying"
+author: "Keith Post"
+date: "6/24/2021"
+output: md_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+\
+
+## **Summary**
+### Background on study
+The effect of grasshoppers on soil nematode and microarthropod (mite) communities were assessed through a short-term field study. Specifically,12-50 x 100 cm plots covered with fine metal mesh cages were set up in the shortgrasss steppe of northern Colorado for roughly 4.5 weeks. Half of the cages were intact to exclude grasshoppers (i.e., exclosures), while the remaing six cages had holes cut in them to allow grasshopper feeding (i.e., caged controls or grasshopper plots). Soils were sampled prior to cage installation for initial numbers of nematodes and microarthropods (as well as soil moisture). Cages were monitored weekly for grasshopper activity. The same sampling was repeated at experiment termination as well as clipping all aboveground plant matter in plots for shoot biomass and soil sampling for root biomass. The latter involved sampling to 20 cm depth in bare soil and plant-covered areas in plots and assessing root biomass by location and depth (0-10 and 10-20 cm). Samples were collected in the field, transported to the laboratory, and processed appropriately. 
+
+### Description of raw data
+The following describe the raw data collected and units of measure:
+
+* Grasshoppers
+  + Number of grasshoppers counted per plot for each date
+* Aboveground plant biomass (measures for each plot)
+  + Mass of plant + bag + washers (g)
+  + Mass of bag + washers (g)
+  + Mass of plants directly measured (g) (note: some plots had directly measured biomass)
+  + Mass of functional groups (g) 
+    - Other grasses (g) (i.e., grasses other than fescue)
+    - Forbs (g)
+    - Shrubs (g)
+* Belowground plant biomass 
+  + Crucible number
+  + Crucible mass (g)
+  + Crucible + plant (g) 
+  + Crucible + ash (g)
+* Soil (for start and end of experiment)
+  + Soil can # 
+  + Soil for microbial extraction (g)
+  + Soil for nematode extraction (g)
+  + Empty can + lid (g)
+  + Soil for moisture determination (g) 
+  + Soil can + lid + dried soil (g)
+  + Mite sample soil + bag (g)
+  + Mite sample bag only (g)
+* Soil nematodes (for each plot at start and end of experiment)
+  + Numbers of each feeding group (in a 200-nematode subsample)
+    - Bacterial feeders (BF)
+    - Fungal feeders (FF)
+    - Plant parasites (PP) 
+    - Omnivores (OM)
+    - Predators (PR)
+    - Unknowns (UNK) 
+  + Total nematodes (TOTAL)
+* Soil microarthropods (or each plot at start and end of experiment)
+  + Numbers of different groups 
+    - Fungal-feeding mites (FF)
+    - Predatory mites (PR)
+    - Springtails (SPR) 
+    - Other arthropods (ARTH)
+  + Total arthropods (TOTAL) 
+
+### Summary of tidying process
+This data project outlines the steps involved in preprocessing the raw data (described above) for statistical analyses primarily using tidyverse and tidyverse-adjacent R packages. The data tidying was separated into three parts/groups: 1) grasshopper, 2) plant biomass, and 3) soil and soil animal data. In general, the following steps were completed for each part: 1) R packages loaded, 2) data importation, 3) data checking (e.g., dimensions, column classes, n's, range of values), 4) data cleaning (e.g., eliminating columns, renaming columns), 5) missing data assessment, 6) reclassifying variables (e.g., changing variable classes, deriving a variable of interest from two or more pieces of raw data), and 7) writing (saving) tidied data.
+
+## **Grasshopper tidying**
+The relevant packages was loaded into R. The function read_xlsx() from the readxl package was used to import the data from an Excel file to R. 
+```{r gh packages and data, results=FALSE, warnings=FALSE, message=FALSE}
+#load packages
+library(here)
+library(readxl)
+library(janitor)
+library(lubridate)
+library(tidyr)
+library(visdat)
+library(skimr)
+library(readr)
+
+#data import
+gh<-read_xlsx(here("data","raw_data","field_expt_gh.xlsx"),col_names=TRUE)
+head(gh) #dates got mangled during read-in
+```
+\
+
+The data cleaning focused on column names as these did not transfer well from Excel. Names only in lowercase and without spaces was the approach for this dataset as well as the whole project. This is easily done with clean_names() in the janitor package. The dates were also changed by creating a vector and using base R.
+```{r gh data cleaning}
+#clean_names
+gh<-clean_names(gh)
+#create date vector
+dates<-c("2014-09-13","2014-09-19","2014-09-26","2014-10-03","2014-10-10",
+         "2014-10-16","2014-10-21")
+#replace date headers with it
+names(gh)[3:9]<-dates
+```
+\
+
+Grasshopper data were reshaped from wide to long format using pivot_longer() in tidyr, and three variables were re-classified.
+```{r gh reshape and reclassify}
+#convert to wide format
+gh<-gh %>% pivot_longer(cols=3:9,names_to="date",values_to="number")
+#reclassify variables
+gh$trmt<-as.factor(gh$trmt)
+gh$date<-ymd(gh$date)
+gh$number<-as.integer(gh$number)
+
+tidy_gh<-gh
+```
+The tibble was renamed to tidy_gh following these initial cleaning steps.
+\
+
+The data were checked by assessing numbers of rows and columns and levels of the factor trmt and previewing parts of the data for any irregularities.
+```{r gh prelim data checking}
+nrow(tidy_gh); ncol(tidy_gh) #check # of rows/cols; 84=12 (plots) * 7 (dates)
+str(tidy_gh) #check classes of variables; they check out
+levels(tidy_gh$trmt) #check factor levels; they check out
+head(tidy_gh,n=10); tail(tidy_gh,n=10) #check top/bottom of tibble
+```
+No issues were found.
+\
+
+Missing data were assessed visually using vis_dat(0) from the visdat package.
+```{r gh missing data}
+vis_dat(tidy_gh)
+```
+
+No missing data were detected, and variable classes were correct.
+\
+
+Grasshopper data were checked once again.
+```{r gh final data check}
+#check n's (using prior knowledge)
+range(tidy_gh$date) #2014-09-13 to 2014-10-21, which are correct range of dates
+range(tidy_gh$number) #0-2, which is correct
+```
+The date and grasshopper count ranges were correct and reasonable, respectively.
+\
+
+The tidied grasshopper data were saved as a .csv.
+```{r gh save data}
+write_csv(tidy_gh,here("data","tidy_data","tidy_gh_data.csv"))
+```
+\
+
+## **Plant biomass tidying**
+The packages need for working with these data were loaded and the data for aboveground plant biomass, aboveground plant biomass by functional group, and belowground plant biomass were read into R. Note that there are duplicate packages loaded across this project as each part would be considered a separate R script.
+```{r plant packages and data, message=FALSE}
+#load packages
+library(here)
+library(readxl)
+library(tidyr)
+library(dplyr)
+library(janitor)
+library(forcats)
+library(purrr)
+library(visdat)
+library(skimr)
+library(readr)
+
+#data import
+ag_plant<-read_xlsx(here("data","raw_data","field_expt_plant.xlsx"),col_names=TRUE,
+                    sheet="Aboveground-total")
+
+ag_plant_groups<-read_xlsx(here("data","raw_data","field_expt_plant.xlsx"),col_names=TRUE,
+                           sheet="Aboveground-functional groups")
+
+bg_plant<-read_xlsx(here("data","raw_data","field_expt_plant.xlsx"),col_names=TRUE,
+                    sheet="Belowground-new")
+```
+\
+
+### Aboveground plant biomass 
+Preliminary data checking, similar to the grasshopper data, was run on both tibbles.
+```{r ag plant prelim data check}
+#preliminary data checking
+dim(ag_plant) #check 34 x 5, which seems correct
+str(ag_plant) #check classes of variables; need to change some eventually
+head(ag_plant,n=10); tail(ag_plant,n=10) #preview data--need to fill; other NAs expected
+
+dim(ag_plant_groups) #12 x 4; 12 plots and 4 variables
+str(ag_plant_groups) #check classes of variables; need to change plot # eventually
+ag_plant_groups #data look fine
+```
+Some variable classes needed to be changed. Plot values were missing for some rows, and missing data were detected. 
+\
+
+The column names for the aboveground plant biomass tibble were cleaned by manually renaming them, while clean_names() was run on the functional group tibble. The missing plot values were addressed using fill() from the tidyr package. 
+```{r ag plant clean col names and fill}
+#create character vector of col names
+ag_plant_names<-c("plot","bag","biomass_bag_washers_g","bag_washers_g","measured_biomass_g")
+names(ag_plant)<-ag_plant_names #append to tibble
+
+ag_plant_groups<-clean_names(ag_plant_groups)
+
+#fill in empty cells
+ag_plant<-fill(ag_plant,plot)
+```  
+\
+
+Aboveground plant biomass was calculated for some plots using mutate(), and an algorithm to select this measure or directly measured biomass was run on the data. Variables were reclassified, and plant biomass was determined for each plot. 
+```{r ag plant reclassify vars and calculate biomass,message=FALSE}
+#rename, compute, eliminate, and reclassify variables
+#compute 'calculated' biomass from subtraction
+ag_plant<-ag_plant %>%
+  mutate(calc_biomass_g=biomass_bag_washers_g-bag_washers_g) #calculate biomass
+ag_plant$calc_biomass_g[29:34]<-NA #replace values with NA where biomass directly measured
+#create algorithm where ag_biomass is based on directly measured or computed biomass
+ag_plant<-ag_plant %>%
+  mutate(ag_biomass_g=ifelse(!is.na(measured_biomass_g),measured_biomass_g,calc_biomass_g))
+#reclassify variables
+ag_plant[1:2]<-map(ag_plant[1:2],as.integer) #convert plot and bag cols to integers
+#sum by plot
+ag_plant_by_plot<-ag_plant %>%
+  group_by(plot) %>%
+  summarize(tot_ag_biomass_g=sum(ag_biomass_g)) %>%
+  ungroup() %>%
+  mutate(trmt=ifelse(plot %in% c(1,3,5,8,9,11),"Gh","Ex")) #add treatment col
+
+#rename and reclassify cols 
+ag_plant_by_plot$trmt<-as.factor(ag_plant_by_plot$trmt)
+names(ag_plant_groups)[1]<-"plot"
+ag_plant_groups$plot<-as.integer(ag_plant_groups$plot)
+```
+\
+
+The two tibbles--aboveground plant biomass and functional group biomass--were joined by plot, fescue biomass column created, and some columns renamed. Plant biomass was converted to biomass density (g/m^2) by dividing biomass by the area of remaining soil surface in each plot (i.e., 0.5 m^2 plot - area removed by soil sampling).
+```{r ag plant join tibbles and convert to density}
+#join ag plant tibbles, create fescue biomass col, and convert biomass to g/m2
+ag_plant_biomass<-inner_join(ag_plant_by_plot,ag_plant_groups,by="plot") %>%
+  mutate(fescue_biomass=tot_ag_biomass_g-(other_grasses_g+forbs_g+shrubs_g)) %>% #create fescue col
+  select(plot,trmt,fescue_biomass,other_grasses_g,forbs_g,shrubs_g,tot_ag_biomass_g) %>% #reorder using select
+  mutate(across(fescue_biomass:tot_ag_biomass_g,~.x/0.49487)) #convert to biomass per m^2
+
+#rename cols
+ag_plant_dens_names<-c("fescue_biomass_g_m2","oth_grasses_g_m2","forbs_g_m2",
+                       "shrubs_g_m2","tot_ag_plant_g_m2")
+names(ag_plant_biomass)[3:7]<-ag_plant_dens_names
+```
+\
+
+### Belowground plant biomass 
+As done with grasshopper and aboveground plant biomass data, root biomass data were visually inspected and checked for numbers of rows and columns and types of variables. The column names were cleaned using clean_names().
+```{r bg plant prelim data check and name clean}
+#preliminary data check
+dim(bg_plant) #check 45 x 7: indicates some missing rows (as a multiple of 12 expected)
+str(bg_plant) #check classes of variables; some need to change some eventually
+head(bg_plant,n=10); tail(bg_plant,n=10) #seems like plots 1 & 2 for location P are missing
+
+#clean and view names
+bg_plant<-clean_names(bg_plant)
+```
+Some variables have inappropriate classes, and missing data were detected.
+\
+
+Root biomass for each location (i.e., bare (B) or plant-covered (P)) and depth (i.e., 0-10, 10-20 cm) were computed and converted to density by scaling up the area of the soil core to 1 m^2. Exclosure treatment was added to each row, and three rows which had missing data were added as well.
+```{r bg plant calc root biomass, convert to dens, add trmt and missing data}
+#compute root biomass and root biomass density
+bg_plant_biomass<-bg_plant %>% 
+  rename(plot=plot_number) %>%
+  mutate(trmt=ifelse(plot %in% c(1,3,5,8,9,11),"Gh","Ex")) %>% #assign trmts
+  mutate(root_g_m2=(crucible_plant_g-crucible_ash_g)*315.764039) %>% #calculate root biomass & convert to g/m^2
+  select(plot,trmt,location,depth_cm,root_g_m2) %>%
+  add_row(plot=c(1,1,2),trmt=c("Gh","Gh","Ex"),location=c("B","P","P"), #add NAs
+          depth_cm=c("10-20","10-20","10-20"),root_g_m2=rep(NA,3)) %>%
+  arrange(plot,location,depth_cm) #sort data
+bg_plant_biomass
+```
+The tibble now has 48 rows (instead of 45 rows), which is correct because there are 12 plots x 2 locations x 2 depths.
+\
+
+Select variables were reclassified and the depth_cm factor levels renamed.
+```{r bg plant reclassify and relevel}
+#reclassify variables
+bg_plant_biomass$plot<-as.integer(bg_plant_biomass$plot)
+bg_plant_biomass[2:4]<-map(bg_plant_biomass[2:4],as.factor)
+bg_plant_biomass$depth_cm<-fct_recode(bg_plant_biomass$depth_cm,`10`="0-10",`20`="10-20") 
+#recode depth levels to make it easier 
+```
+\
+
+### Shoot:root biomass calculation and tidying
+The ratio of shoot biomass to root biomass (known as shoot:root) was calculated using aboveground biomass density and the density of root biomass using 0-20 cm depth. This process included summing root biomass density across location and depth and dividing by two (to account for two soil cores per plot). Shoot:root was computed.
+```{r shoot-root calculate root biomass density per plot and compute s-r, message=FALSE}
+#sum and avg root biomass for each plot 
+tot_root_biomass<-bg_plant_biomass %>%
+  group_by(plot,trmt) %>%
+  summarize(tot_root_g_m2=sum(root_g_m2/2)) #take average value based on bare and plant locations
+
+#compute s:r data
+s_r_data<-bind_cols(ag_plant_biomass[c(1,2,7)],tot_root_biomass[3]) %>%
+  mutate(s_r=tot_ag_plant_g_m2/tot_root_g_m2)
+```
+\
+\
+\
+
+Missing data for the three tibbles (i.e., aboveground biomass, belowground biomass, shoot:root) were assessed visually, and the tibbles were checked for any irregularities in their values. 
+```{r plant missing data, data check, save data}
+#missing data assessment
+vis_dat(ag_plant_biomass) #0 NAs
+vis_dat(bg_plant_biomass) #3 NAs; expected
+vis_dat(s_r_data) #2 cols with a few values each
+#missing data expected
+
+#checking data for irregularities
+dim(ag_plant_biomass); dim(bg_plant_biomass); dim(s_r_data) #all seem fine
+str(ag_plant_biomass); str(bg_plant_biomass); str(s_r_data) #all cols coded correctly
+ag_plant_biomass
+s_r_data
+head(bg_plant_biomass,n=10); tail(bg_plant_biomass,n=10) #look as expected
+
+range(ag_plant_biomass$tot_ag_plant_g_m2) 
+range(bg_plant_biomass$root_g_m2,na.rm=TRUE) 
+range(s_r_data$s_r,na.rm=TRUE)
+#all look fine
+```
+The missing data were as expected. All columns were coded correctly, and data values seemed reasonable.
+\
+
+The tibbles were saved as .csv files.
+```{r plant save files}
+#export tibbles as a .csv
+write_csv(ag_plant_biomass,here("data","tidy_data","ag_plant_biomass.csv"))
+write_csv(bg_plant_biomass,here("data","tidy_data","bg_plant_biomass.csv"))
+write_csv(s_r_data,here("data","tidy_data","s_r_data.csv"))
+```
+\
+
+## **Soil and soil animal tidying**
+Relevant packages and raw data were read into R. These datasets included initial and final soil, nematode, and microarthropod (mite) data.
+```{r soil packages and data, message=FALSE}
+#load packages
+library(here)
+library(readxl)
+library(tibble)
+library(janitor)
+library(dplyr)
+library(purrr)
+library(visdat)
+library(skimr)
+library(readr)
+
+#import data
+initial_soil<-read_xlsx(here("data","raw_data","field_expt_soil_orgs.xlsx"),
+                        skip=1,col_names=TRUE,sheet="Raw Soil-Initial")
+final_soil<-read_xlsx(here("data","raw_data","field_expt_soil_orgs.xlsx"),
+                      skip=1,col_names=TRUE,sheet="Raw Soil-Final")
+initial_nema<-read_xlsx(here("data","raw_data","field_expt_soil_orgs.xlsx"),
+                        skip=3,n_max=12,col_names=TRUE,sheet="Nematodes")
+final_nema<-read_xlsx(here("data","raw_data","field_expt_soil_orgs.xlsx"),
+                      skip=21,n_max=12,col_names=TRUE,sheet="Nematodes")
+initial_mite<-read_xlsx(here("data","raw_data","field_expt_soil_orgs.xlsx"),
+                        skip=3,n_max=12,col_names=TRUE, sheet="Mites")
+final_mite<-read_xlsx(here("data","raw_data","field_expt_soil_orgs.xlsx"),
+                      skip=21,n_max=12,col_names=TRUE,sheet="Mites")
+```
+\
+
+Soil data were visualized in their entirety for a data check. Tibbles were combined, and a harvest column added.
+```{r soil combine and add harvest var}
+#preliminary data checking
+initial_soil #12 x 9; looks reasonable; a couple cols need to be reclassified
+final_soil #same as above
+
+#add harvest variable and combine tibbles
+initial_soil<-initial_soil %>%
+  add_column(harvest=rep("I",12),.after="Plot")
+final_soil<-final_soil %>%
+  add_column(harvest=rep("F",12),.after="Plot")
+soil<-bind_rows(initial_soil,final_soil)
+```
+\
+
+Soil data column names were cleaned and soil variables (i.e., soil dryness (as a proportion), dry soil (kg) of nematode and mite samples, soil moisture (%)) were computed. Grasshopper exlosure treatment variable was added.
+```{r soil name clean, derive variables, and add trmt}
+#clean column names
+soil<-clean_names(soil)
+
+#compute soil variables of interest based on raw data, append trmt variable
+soil_vars<-soil %>%
+  mutate(soil_dryness_prop=(soil_can_lid_dried_soil_g-empty_can_lid_g)/soil_for_moisture_determination_g) %>%
+  mutate(nema_dry_soil_kg=(soil_for_nematode_extraction_g*soil_dryness_prop)/1000) %>%
+  mutate(mite_dry_soil_kg=((mite_sample_soil_bag_g-mite_sample_bag_only_g)*soil_dryness_prop)/1000) %>%
+  mutate(soil_moisture_per=(1-soil_dryness_prop)*100) %>%
+  mutate(trmt=ifelse(plot %in% c(1,3,5,8,9,11),"Gh","Ex")) %>%
+  select(plot,trmt,harvest,soil_moisture_per,nema_dry_soil_kg,mite_dry_soil_kg)
+```
+\
+
+Select soil variables were reclassified.
+```{r soil reclassify}
+#reclassify variables
+soil_vars$plot<-as.integer(soil_vars$plot)
+soil_vars[2:3]<-map(soil_vars[2:3],as.factor)
+```
+\
+
+Nematode data were checked by visual inspection.
+```{r nema prelim data check}
+#preliminary data check
+initial_nema #12 x 8; need to reclassify vars
+final_nema #same as directly above
+```
+This check indicated that some variables need to be reclassified.
+\
+
+Nematode datasets were combined into a single tibble with a harvest column added. Columns with low counts (i.e., predators, unknowns) were removed, and column names were cleaned.
+```{r nema combine, remove cols, and add harvest var}
+#add harvest variable, combine tibbles, and remove cols with low counts
+initial_nema<-initial_nema %>%
+  add_column(harvest=rep("I",12),.after="Plot")
+final_nema<-final_nema %>%
+  add_column(harvest=rep("F",12),.after="Plot")
+nema<-bind_rows(initial_nema,final_nema)
+nema<-nema[,c(1:6,9)]
+
+#clean column names
+nema<-clean_names(nema)
+```
+\
+
+Nematode counts by feeding group were converted to densities (number/kg dry soil). An exclosure treatment column was added, and the ratio of bacterial- to fungal-feeding nematodes was computed for each plot and harvest.
+````{r nema convert to density, add trmt col, and calculate bf-ff}
+#compute nema density variables of interest based on nema counts and dry soil data, append trmt variable
+nema_dens<-nema %>%
+  add_column(soil_vars[4:5],.after="harvest") %>%
+  mutate(total_nema=total/nema_dry_soil_kg) %>%
+  mutate(across(.cols=5:8,~((.x/200)*total_nema))) %>%
+  mutate(trmt=ifelse(plot %in% c(1,3,5,8,9,11),"Gh","Ex")) %>%
+  mutate(bf_ff=bf/ff) %>%
+  select(plot,trmt,harvest,soil_moisture_per,bf,ff,pp,om,bf_ff,total_nema)
+```
+\
+
+A separate tibble consisting of proportions of nematode feeding groups was created by converting the original counts by feeding group to proportions and selecting only variables of interest.
+```{r nema determine proportions}
+#compute nema proportions
+nema_prop <- nema %>% 
+  mutate(across(.cols=3:6,~((.x/200)))) %>%
+  mutate(trmt=ifelse(plot %in% c(1,3,5,8,9,11),"Gh","Ex")) %>%
+  select(plot,trmt,harvest,bf,ff,pp,om)
+```
+\
+
+Select variables in both the nematode density and proportion tibbles were reclassified.
+```{r nema reclassify}
+#reclassify variables
+#densities
+nema_dens$plot<-as.integer(nema_dens$plot)
+nema_dens[2:3]<-map(nema_dens[2:3],as.factor)
+
+#proportions
+nema_prop$plot<-as.integer(nema_prop$plot)
+nema_prop[2:3]<-map(nema_prop[2:3],as.factor)
+```
+\
+
+Similar to the nematode data, the mite data were visually inspected as a preliminary data check.
+```{r mite prelim data check}
+#preliminary data check
+initial_mite #12 x 8; last two cols irrelevant; need to reclassify vars
+final_mite #same as directly above
+```
+\
+
+The initial and final datasets of the mite datasets were combined. Harvest period was added as a column, and column names were cleaned.
+```{r mite combine, add harvest var, and clean names}
+#remove irrelevant cols and cols with low counts, add harvest variable, and combine tibbles
+initial_mite<-initial_mite[,-c(4:5,7:8)]
+final_mite<-final_mite[,-c(4:5,7:8)]
+initial_mite<-initial_mite %>%
+  add_column(harvest=rep("I",12),.after="Plot")
+final_mite<-final_mite %>%
+  add_column(harvest=rep("F",12),.after="Plot")
+mite<-bind_rows(initial_mite,final_mite)
+
+#clean column names
+mite<-clean_names(mite)
+```
+\
+
+Microarthropod counts were converted to densities (number per dry kg soil), and exclosure treatment was added as a column.
+```{r mite convert to density and add trmt col}
+#compute mite variables of interest based on mite counts and dry soil data, append trmt variable
+mite_dens<-mite %>%
+  rename(ff_mite=ff) %>%
+  rename(pr_mite=pr) %>%
+  rename(total_marth=total) %>%
+  add_column(soil_vars[6],.after="harvest") %>%
+  mutate(across(.cols=c("ff_mite","pr_mite","total_marth"),~.x/mite_dry_soil_kg)) %>%
+  mutate(total_mite=ff_mite+pr_mite) %>%
+  mutate(trmt=ifelse(plot %in% c(1,3,5,8,9,11),"Gh","Ex")) %>%
+  select(plot,trmt,harvest,ff_mite,pr_mite,total_mite,total_marth) 
+```
+\
+
+Select microarthropod variables were reclassified.
+```{r mite reclassify}
+#reclassify variables
+mite_dens$plot<-as.integer(mite_dens$plot)
+```
+\
+
+All soil data (i.e., nematode densities, nematode proportions, mite densities) were assessed visually for missingness and checked for irregularities.
+```{r soil missing data and check}
+#missing data assessment
+vis_dat(nema_dens) 
+vis_dat(nema_prop)
+vis_dat(mite_dens) 
+#no missing data
+
+#checking data for irregularities
+dim(nema_dens); dim(nema_prop); dim(mite_dens) #all seem fine
+str(nema_dens); str(nema_prop); str(mite_dens) #all cols coded correctly
+head(nema_dens); tail(nema_dens) #look as expected
+head(nema_prop); tail(nema_prop) #look as expected
+head(mite_dens); tail(mite_dens) #look as expected
+
+map(nema_dens[4:10],range)
+map(nema_prop[4:7],range)
+map(mite_dens[4:7],range)
+#no irregularities detected
+```
+No missing data or irregularities detected.
+\
+
+The three tibbles (i.e., nematode densities, nematode proportions, mite densities) were saved as separate .csv files.
+```{r soil save data}
+#export tibbles as a .csv
+write_csv(nema_dens,here("data","tidy_data","nema_densities.csv"))
+write_csv(nema_prop,here("data","tidy_data","nema_proportions.csv"))
+write_csv(mite_dens,here("data","tidy_data","mite_densities.csv"))
+```
+\
+\
+
+## **Conclusion**
+The data cleaning, wrangling, processing steps shown above yielded the following files: 1) tidy_gh_data.csv, 2) ag_plant_biomass.csv, 3) bg_plant_biomass.csv, 4) s_r_data.csv, 5) nema_densities.csv, 6) nema_proportions_csv, and 7) mite_densities. These files are in a tidy format, have correct column classes, and no excessive missingness (beyond what was expected from raw files). These datasets could be easily read into R using read_csv() from the readr package. The data are in the appropriate format for exploration (e.g., visualization, summary statistics) and/or statistical analysis because columns are properly coded and tibbles are tidy (i.e., one variable per column, one observation per row, and one table per type of data). The plot variable, which exists in all tibbles, enables one to analyze data from multiple tibbles using join statements.
