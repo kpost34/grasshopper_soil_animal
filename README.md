@@ -21,6 +21,7 @@ The overall goal of this project was to assess the impact of grasshopper feeding
 - [x] Wrangle data
 - [x] Check data
 - [x] Save tidy data
+- [x] Write report
 
 
 #### **Project Creator: Keith Post**
